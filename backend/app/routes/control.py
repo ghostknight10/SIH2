@@ -68,15 +68,17 @@ async def inject(session_id: str, body: InjectReport, request: Request,
     message = new_message(
         state, source="instructor", sender=instructor["username"], sender_team=None,
         to_teams=tuple(dict.fromkeys(body.to)), content=body.text.strip(),
-        alt_content=body.alt_text, conflict_prob=body.conflict_prob,
+        alt_content=body.alt_text, conflict_prob=body.conflict_prob, priority=body.priority,
     )
     manager.log(state, "instructor_report_injected", instructor["username"], {
         "message_id": message.id, "to": list(message.to_teams), "fake": body.fake,
+        "priority": message.priority,
         "clock_s": message.sent_clock,
     })
     route_message(manager, state, message)
     await manager.flush_events()
     return {"message_id": message.id, "clock_s": message.sent_clock, "fake": body.fake,
+            "priority": message.priority,
             "pending_deliveries": manager.pending_delivery_count(state)}
 
 
@@ -93,17 +95,26 @@ async def end(session_id: str, request: Request, instructor: dict = Depends(requ
 
 @router.get("/sessions/{session_id}/events")
 def events(session_id: str, request: Request, _: dict = Depends(require_instructor)):
-    state = _state(request, session_id)
-    return request.app.state.db.get_events(state.id)
+    if request.app.state.db.get_session(session_id) is None:
+        raise HTTPException(404, "Session not found")
+    return request.app.state.db.get_events(session_id)
 
 
 @router.get("/sessions/{session_id}/aar")
 def aar(session_id: str, request: Request, _: dict = Depends(require_instructor)):
-    state = _state(request, session_id)
-    return request.app.state.manager.build_aar(state)
+    manager = request.app.state.manager
+    state = manager.get(session_id)
+    report = manager.build_aar(state) if state is not None else manager.build_aar_from_db(session_id)
+    if report is None:
+        raise HTTPException(404, "Session not found")
+    return report
 
 
 @router.get("/sessions/{session_id}/aar.html", response_class=HTMLResponse)
 def aar_html(session_id: str, request: Request, _: dict = Depends(require_instructor)):
-    state = _state(request, session_id)
-    return HTMLResponse(render_html(request.app.state.manager.build_aar(state)))
+    manager = request.app.state.manager
+    state = manager.get(session_id)
+    report = manager.build_aar(state) if state is not None else manager.build_aar_from_db(session_id)
+    if report is None:
+        raise HTTPException(404, "Session not found")
+    return HTMLResponse(render_html(report))

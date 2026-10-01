@@ -50,3 +50,4 @@ class InjectReport(BaseModel):
     alt_text: str | None = Field(default=None, max_length=500)
     conflict_prob: float | None = Field(default=None, ge=0, le=1)
     fake: bool = False
+    priority: Literal["URGENT", "HIGH", "NORMAL", "LOW"] = "NORMAL"

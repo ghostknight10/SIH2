@@ -12,6 +12,7 @@ import time
 from typing import TYPE_CHECKING
 
 from .comms import new_message, route_message
+from .communication_intel import normalize_priority
 
 if TYPE_CHECKING:
     from .sessions import Connection, SessionManager, SessionState
@@ -70,11 +71,15 @@ def _handle_message(manager, state, conn, msg, ref, err) -> dict:
     else:
         return err("invalid", "'to' must be \"all\" or a non-empty list of team ids")
 
+    try:
+        priority = normalize_priority(msg.get("priority"))
+    except ValueError as exc:
+        return err("invalid", str(exc))
     message = new_message(state, source="player", sender=conn.username, sender_team=conn.team,
-                          to_teams=teams, content=text)
+                          to_teams=teams, content=text, priority=priority)
     route_message(manager, state, message)
     return {"type": "ack", "kind": "message", "id": message.id,
-            "sent_clock": message.sent_clock, "ref": ref}
+            "sent_clock": message.sent_clock, "priority": message.priority, "ref": ref}
 
 
 def _handle_order(manager, state, conn, msg, ref, err) -> dict:

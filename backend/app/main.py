@@ -51,7 +51,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/health")
     async def health(request: Request):
-        return {"status": "ok", "scenarios": len(request.app.state.scenarios)}
+        # Touch the DB so a broken mounted volume is reported as unhealthy instead
+        # of looking like a healthy API with unusable persistence.
+        request.app.state.db.count_users()
+        return {
+            "status": "ok",
+            "scenarios": len(request.app.state.scenarios),
+            "active_sessions": len(request.app.state.manager.all()),
+            "database": "ok",
+        }
 
     return app
 

@@ -13,8 +13,9 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from typing import Any, Callable
 
-from .aar import build_aar
+from .aar import assignments_from_events, build_aar
 from .clock import SessionClock
+from .communication_intel import information_quality
 from .db import Database
 from .degradation import DegradationPolicy
 from .delivery import DeliveryScheduler
@@ -249,6 +250,11 @@ class SessionManager:
             "delivered_clock": state.clock_s,
             "delay_s": delivery.delay_s,
             "tampered": delivery.tampered,
+            "priority": delivery.priority,
+            "information_quality": information_quality(
+                delay_s=delivery.delay_s or 0.0, priority=delivery.priority,
+                tampered=delivery.tampered, max_delay_s=state.policy.max_delay_s,
+            ),
         }
         ok = await self.send_json(conn, payload)
         if not ok:
@@ -266,6 +272,11 @@ class SessionManager:
             "delivered_clock": state.clock_s,
             "delivery_delay_s": delivery.delay_s,
             "tampered": delivery.tampered,
+            "priority": delivery.priority,
+            "information_quality": information_quality(
+                delay_s=delivery.delay_s or 0.0, priority=delivery.priority,
+                tampered=delivery.tampered, max_delay_s=state.policy.max_delay_s,
+            ),
         })
         return True
 
@@ -403,6 +414,22 @@ class SessionManager:
             "description": state.scenario.description,
         }
         return build_aar(events, state.assignments, scenario)
+
+    def build_aar_from_db(self, session_id: str) -> dict | None:
+        """Build an AAR from durable DB data when the live session is not in memory."""
+        row = self.db.get_session(session_id)
+        if row is None:
+            return None
+        scenario = self._scenarios.get(row["scenario_id"])
+        if scenario is None:
+            return None
+        events = self.db.get_events(session_id)
+        assignments = assignments_from_events(events)
+        return build_aar(events, assignments, {
+            "id": scenario.id,
+            "name": scenario.name,
+            "description": scenario.description,
+        })
 
     def pending_delivery_count(self, state: SessionState) -> int:
         return len(state.delivery_heap) + sum(len(v) for v in state.offline_deliveries.values())

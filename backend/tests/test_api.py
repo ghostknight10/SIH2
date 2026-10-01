@@ -45,7 +45,8 @@ class ApiTests(unittest.TestCase):
         return r.json()
 
     def test_health(self):
-        self.assertEqual(self.client.get("/health").json(), {"status": "ok", "scenarios": 1})
+        self.assertEqual(self.client.get("/health").json()["status"], "ok")
+        self.assertEqual(self.client.get("/health").json()["database"], "ok")
 
     def test_login(self):
         ok = self.login("Player1")  # case-insensitive username
@@ -147,6 +148,27 @@ class ApiTests(unittest.TestCase):
         i = self.auth("instructor")
         self.assertEqual(self.client.post("/sessions", json={"scenario_id": "ambush_north", "seed": -1}, headers=i).status_code, 422)
         self.assertEqual(self.client.post("/sessions", json={"scenario_id": "ambush_north", "seed": 7}, headers=i).status_code, 201)
+
+    def test_aar_survives_api_restart_from_durable_events(self):
+        s = self.make_session(assignments={"player1": "alpha", "player2": "bravo"}, seed=7)
+        session_id = s["id"]
+        self.assertEqual(self.client.post(f"/sessions/{session_id}/start", headers=self.auth("instructor")).status_code, 200)
+        self.assertEqual(self.client.post(f"/sessions/{session_id}/end", headers=self.auth("instructor")).status_code, 200)
+
+        # Simulate a process restart: build a second app against the same SQLite file.
+        db_path = self.client.app.state.settings.db_path
+        from app.main import create_app
+        settings = self.client.app.state.settings
+        restarted = create_app(settings)
+        with TestClient(restarted) as client2:
+            headers = {"Authorization": f"Bearer {client2.post('/login', json={'username': 'instructor', 'password': 'pw12345'}).json()['access_token']}"}
+            report = client2.get(f"/sessions/{session_id}/aar", headers=headers)
+            self.assertEqual(report.status_code, 200, report.text)
+            self.assertEqual(report.json()["scenario"]["id"], "ambush_north")
+            self.assertIn("player1", [x["username"] for x in report.json()["leaders"]])
+            html = client2.get(f"/sessions/{session_id}/aar.html", headers=headers)
+            self.assertEqual(html.status_code, 200)
+            self.assertIn("After-Action Review", html.text)
 
 
 if __name__ == "__main__":

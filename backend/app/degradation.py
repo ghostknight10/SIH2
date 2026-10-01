@@ -16,6 +16,10 @@ import random
 from dataclasses import dataclass
 from typing import Mapping
 
+from .communication_intel import (
+    PRIORITY_DELAY_MULTIPLIER, PRIORITY_DROP_MULTIPLIER, normalize_priority,
+)
+
 
 @dataclass
 class DegradationPolicy:
@@ -44,6 +48,7 @@ class Message:
     sent_clock: float                # scenario seconds when it was sent
     alt_content: str | None = None   # conflicting version, if one exists
     conflict_prob: float | None = None
+    priority: str = "NORMAL"
 
 
 @dataclass(frozen=True)
@@ -57,6 +62,7 @@ class Delivery:
     deliver_at: float | None = None  # scenario-clock seconds
     content: str = ""                # what the recipient will be shown
     tampered: bool = False
+    priority: str = "NORMAL"
 
 
 DROP_SENDER_RADIO = "sender_radio_down"
@@ -75,14 +81,16 @@ def decide(policy: DegradationPolicy, message: Message, recipient: str, recipien
         return dropped(DROP_SENDER_RADIO)
     if not radio_up.get(recipient_team, True):
         return dropped(DROP_RECIPIENT_RADIO)
-    if rng.random() < policy.drop_prob:
+    priority = normalize_priority(message.priority)
+    effective_drop = min(1.0, policy.drop_prob * PRIORITY_DROP_MULTIPLIER[priority])
+    if rng.random() < effective_drop:
         return dropped(DROP_RANDOM)
 
-    delay = rng.uniform(policy.min_delay_s, policy.max_delay_s)
+    delay = rng.uniform(policy.min_delay_s, policy.max_delay_s) * PRIORITY_DELAY_MULTIPLIER[priority]
     content, tampered = message.content, False
     if message.alt_content is not None:
         p = policy.conflict_prob if message.conflict_prob is None else message.conflict_prob
         if rng.random() < p:
             content, tampered = message.alt_content, True
     return Delivery(message, recipient, recipient_team, "scheduled", delay_s=delay,
-                    deliver_at=sent + delay, content=content, tampered=tampered)
+                    deliver_at=sent + delay, content=content, tampered=tampered, priority=priority)

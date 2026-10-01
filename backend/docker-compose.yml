@@ -3,12 +3,19 @@ services:
     build: .
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      SIH_JWT_SECRET: ${SIH_JWT_SECRET:-change-me-in-compose}
-      SIH_SEED_PASSWORD: ${SIH_SEED_PASSWORD:-demo123}
-      SIH_CORS_ORIGINS: ${SIH_CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      SIH_DB_PATH: /data/sih.db
+      SIH_SCENARIO_DIR: /app/scenarios
     volumes:
       - sih-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
 
 volumes:

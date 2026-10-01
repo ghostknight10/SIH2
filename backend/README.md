@@ -16,6 +16,7 @@ uvicorn app.main:app --reload
 ```
 
 Docs: `http://localhost:8000/docs`
+Health: `http://localhost:8000/health`
 
 Run all tests:
 
@@ -167,3 +168,48 @@ A small client smoke test is provided at `scripts/simulate_clients.py`.
 - PDF AAR export is not included; HTML is ready for browser print-to-PDF.
 - SQLite is appropriate for the hackathon MVP. The event logger is isolated so the
   storage implementation can be replaced later.
+
+
+## Person-C deliverables
+
+- `.env.example` — deployment/local environment template.
+- `C_HANDOFF.md` — ownership and integration notes for the data/logging/AAR/deployment workstream.
+- `scripts/validate_scenarios.py` — validates every scenario JSON file before a demo.
+- `scripts/export_aar.py` — exports a persisted session's AAR to JSON + HTML even after the API process has restarted.
+- `docker-compose.yml` — persistent SQLite volume, environment file, restart policy and API healthcheck.
+
+The durable DB stores session metadata and the append-only event log. Live sockets, delivery queues and background tasks remain in memory; an active simulation is not resumed after a process restart. Completed-session AARs and event logs remain recoverable.
+
+## Standout communication-intelligence features
+
+This final build adds deterministic, domain-specific features on top of the PS-248 MVP:
+
+1. **Message priority** — `URGENT`, `HIGH`, `NORMAL`, `LOW`. Priority changes the simulated loss and delay profile while remaining reproducible from the session seed.
+2. **Information freshness/confidence** — delivered messages include `information_quality` with `age_s`, `freshness`, `confidence`, and `status` (`FRESH`/`STALE`). Tampered information receives a confidence penalty.
+3. **Uncertainty propagation into decisions** — the AAR links an order to the most recent received report and records that report's priority and information quality, showing when a decision followed stale/low-confidence information.
+4. **Communication bottleneck analysis** — the AAR aggregates reliability, loss rate, average delay, stale information and tampering by communication link and identifies the most affected link.
+5. **Decision timeline** — the existing player timeline now carries the communication context immediately preceding an order, making the cause/effect chain visible without an LLM.
+
+### Player message example
+
+```json
+{"type":"message","to":["bravo"],"priority":"URGENT","text":"Enemy contact detected","ref":7}
+```
+
+### Delivered message example
+
+```json
+{
+  "type":"message",
+  "message_id":"m12",
+  "priority":"URGENT",
+  "information_quality": {
+    "age_s": 6.0,
+    "freshness": 0.819,
+    "confidence": 0.819,
+    "status":"FRESH"
+  }
+}
+```
+
+The implementation is deterministic and does not require an external AI/LLM service.

@@ -91,6 +91,11 @@ class Database:
         return dict(row) if row else None
 
     # ---- sessions ----------------------------------------------------------
+    def get_session(self, session_id: str) -> dict | None:
+        with self.connect() as conn:
+            row = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
+        return dict(row) if row else None
+
     def insert_session(self, session_id: str, scenario_id: str, created_by: int,
                        status: str, created_at: float) -> None:
         with self.connect() as conn:

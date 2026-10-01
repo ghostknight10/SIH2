@@ -16,13 +16,14 @@ if TYPE_CHECKING:  # avoid a runtime import cycle with sessions.py
 
 def new_message(state: "SessionState", *, source: str, sender: str, sender_team: str | None,
                 to_teams, content: str, alt_content: str | None = None,
-                conflict_prob: float | None = None, sent_clock: float | None = None) -> Message:
+                conflict_prob: float | None = None, sent_clock: float | None = None,
+                priority: str = "NORMAL") -> Message:
     state.message_counter += 1
     return Message(
         id=f"m{state.message_counter}", source=source, sender=sender, sender_team=sender_team,
         to_teams=tuple(to_teams), content=content,
         sent_clock=state.clock.now() if sent_clock is None else sent_clock,
-        alt_content=alt_content, conflict_prob=conflict_prob,
+        alt_content=alt_content, conflict_prob=conflict_prob, priority=priority,
     )
 
 
@@ -45,6 +46,7 @@ def route_message(manager: "SessionManager", state: "SessionState", message: Mes
         "to_teams": list(message.to_teams),
         "recipients": [u for u, _ in recipients],
         "content": message.content,
+        "priority": message.priority,
         "has_alt_content": message.alt_content is not None,
         "clock_s": message.sent_clock,
     })
@@ -56,6 +58,7 @@ def route_message(manager: "SessionManager", state: "SessionState", message: Mes
         if d.outcome == "dropped":
             manager.log(state, "message_dropped", username, {
                 "message_id": message.id, "recipient_team": team, "reason": d.reason,
+                "priority": message.priority,
                 "clock_s": message.sent_clock,
             })
             continue
@@ -64,6 +67,7 @@ def route_message(manager: "SessionManager", state: "SessionState", message: Mes
         manager.log(state, "message_scheduled", username, {
             "message_id": message.id, "recipient_team": team, "delay_s": d.delay_s,
             "deliver_at_clock": d.deliver_at, "tampered": d.tampered,
+            "priority": d.priority,
             "content_shown": d.content, "clock_s": message.sent_clock,
         })
     if state.delivery is not None:
