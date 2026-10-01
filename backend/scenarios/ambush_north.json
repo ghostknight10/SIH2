@@ -1,0 +1,27 @@
+{
+  "id": "ambush_north",
+  "name": "Northern Ridge: Conflicting Reports",
+  "description": "Three friendly teams hold a valley while an opposing force moves in from the north. Reports about its direction will conflict once communications degrade.",
+  "teams": [
+    {"id": "alpha",   "name": "Alpha Company",  "side": "friendly"},
+    {"id": "bravo",   "name": "Bravo Company",  "side": "friendly"},
+    {"id": "charlie", "name": "Charlie Recon",  "side": "friendly"},
+    {"id": "opfor",   "name": "Opposing Force", "side": "enemy"}
+  ],
+  "units": [
+    {"id": "alpha_1",   "name": "Alpha 1",   "team": "alpha",   "kind": "infantry", "lat": 34.1520, "lon": 77.5780},
+    {"id": "alpha_2",   "name": "Alpha 2",   "team": "alpha",   "kind": "infantry", "lat": 34.1505, "lon": 77.5810},
+    {"id": "bravo_1",   "name": "Bravo 1",   "team": "bravo",   "kind": "armor",    "lat": 34.1470, "lon": 77.5900},
+    {"id": "bravo_2",   "name": "Bravo 2",   "team": "bravo",   "kind": "armor",    "lat": 34.1460, "lon": 77.5930},
+    {"id": "charlie_1", "name": "Charlie 1", "team": "charlie", "kind": "recon",    "lat": 34.1600, "lon": 77.5850},
+    {"id": "opfor_1",   "name": "Contact 1", "team": "opfor",   "kind": "infantry", "lat": 34.1900, "lon": 77.5800},
+    {"id": "opfor_2",   "name": "Contact 2", "team": "opfor",   "kind": "armor",    "lat": 34.1950, "lon": 77.5950}
+  ],
+  "events": [
+    {"at": 60,  "kind": "report", "to": ["alpha", "bravo"], "text": "Enemy column sighted moving south from the northern ridge.",
+     "alt_text": "Northern ridge report was a false alarm; no enemy movement confirmed.", "conflict_prob": 0.25},
+    {"at": 120, "kind": "report", "to": ["bravo"], "text": "Contact reported on the eastern road.",
+     "alt_text": "Eastern road reported clear; all contact is from the north.", "conflict_prob": 0.5},
+    {"at": 180, "kind": "report", "to": ["charlie"], "text": "Northern ridge clear, no movement observed."}
+  ]
+}

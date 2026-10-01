@@ -1,0 +1,15 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      SIH_JWT_SECRET: ${SIH_JWT_SECRET:-change-me-in-compose}
+      SIH_SEED_PASSWORD: ${SIH_SEED_PASSWORD:-demo123}
+      SIH_CORS_ORIGINS: ${SIH_CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+    volumes:
+      - sih-data:/data
+    restart: unless-stopped
+
+volumes:
+  sih-data:
