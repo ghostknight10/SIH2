@@ -24,10 +24,9 @@
   - [Comms Screen (Communications Matrix & CSV Export)](#-comms-screen-communications-matrix--csv-export)
   - [Control Screen (Instructor Jamming & False Intel)](#-control-screen-instructor-jamming--false-intel)
   - [AAR Screen (Decision Timeline & Bottleneck Forensics)](#-aar-screen-decision-timeline--bottleneck-forensics)
-- [7. Design System & Typography](#7-design-system--typography)
-- [8. Quickstart & How to Run](#8-quickstart--how-to-run)
-- [9. Automated Verification & Testing](#9-automated-verification--testing)
-- [10. Project Directory Layout](#10-project-directory-layout)
+- [7. Quickstart & How to Run](#7-quickstart--how-to-run)
+- [8. Automated Verification & Testing](#8-automated-verification--testing)
+- [9. Project Directory Layout](#9-project-directory-layout)
 
 ---
 
@@ -229,22 +228,12 @@ flowchart TD
 
 ---
 
-## 7. User Interface & Experience
-
-The application is engineered for high-density situational awareness, drawing from real-world telemetry and operations consoles (**Datadog**, **Linear**, and **Grafana**):
-
-* **Dual-Theme Support**: Instant toggle between high-contrast **Dark Mode** (zinc-950 canvas) and crisp **Light Mode** (slate-100 canvas with elevated white surfaces and defined borders).
-* **Anti-Jitter Typography**: Built with **Inter** for clean navigational typography and **Geist Mono** with fixed-width tabular numerals (`tabular-nums`) to prevent layout shifting as live pings and packet counters fluctuate.
-* **Streamlined Interaction**: Segmented pills and 1-click target chips replace nested dropdowns for rapid squad targeting and failover simulation.
-* **Visual Hierarchy**: Contiguous metrics strips, dual-axis timeseries charts, and status indicators communicate channel health without cognitive clutter.
-
----
-
-## 8. Quickstart & How to Run
+## 7. Quickstart & How to Run
 
 ### Prerequisites
 * **Node.js**: `v18.0.0` or higher (Node `v20+` recommended)
 * **npm**: `v9.0.0` or higher
+* **Python** (Optional, for backend): `3.10+` with FastAPI & Uvicorn
 
 ### 1. Installation
 Clone the repository and install all dependencies:
@@ -261,19 +250,27 @@ npm run dev
 ```
 Navigate to **`http://localhost:5173`** in your browser.
 
-### 3. Run Automated Test Suite
+### 3. Start Python Backend (Optional)
+To run the companion FastAPI + WebSocket telemetry server on `http://127.0.0.1:8000`:
+```bash
+npm run backend
+# or: python backend/run.py
+```
+> The frontend auto-detects the backend. If offline, it smoothly defaults to the high-fidelity in-browser simulator.
+
+### 4. Run Automated Test Suite
 Run the 16 automated end-to-end and telemetry tests using Node's built-in test runner:
 ```bash
 npm run test
 ```
 
-### 4. Run Linter
+### 5. Run Linter
 Run Oxlint across all TypeScript and React components:
 ```bash
 npm run lint
 ```
 
-### 5. Production Build
+### 6. Production Build
 Compile TypeScript and bundle the application for production deployment:
 ```bash
 npm run build
@@ -282,7 +279,7 @@ The optimized bundle will be generated in the **`dist/`** directory.
 
 ---
 
-## 9. Automated Verification & Testing
+## 8. Automated Verification & Testing
 
 The test suite in [`tests/tactical.test.mjs`](file:///c:/Users/watas/OneDrive/Documents/Desktop/SIH2/tests/tactical.test.mjs) validates all core application requirements:
 
@@ -309,10 +306,16 @@ The test suite in [`tests/tactical.test.mjs`](file:///c:/Users/watas/OneDrive/Do
 
 ---
 
-## 10. Project Directory Layout
+## 9. Project Directory Layout
 
 ```
 SIH2/
+├── backend/                # FastAPI + WebSocket server & degradation engine
+│   ├── app/
+│   │   ├── main.py         # REST & WebSocket API endpoints
+│   │   └── engine.py       # Latency, loss & freshness simulation physics
+│   ├── requirements.txt    # Python dependencies
+│   └── run.py              # 1-click launcher script
 ├── public/                 # Static assets and icons
 ├── src/
 │   ├── components/
@@ -327,7 +330,7 @@ SIH2/
 │   │   │   ├── ControlScreen.tsx
 │   │   │   └── AARScreen.tsx
 │   ├── store/              # tacticalStore.ts (Zustand state engine)
-│   ├── services/           # types.ts (Type definitions & schemas)
+│   ├── services/           # types.ts, websocket.ts (Auto-discovery client), csvExport.ts
 │   ├── index.css           # Tailwind CSS v4 & theme variables
 │   ├── App.tsx             # Root application orchestrator
 │   └── main.tsx            # React 19 entry point

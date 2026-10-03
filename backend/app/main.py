@@ -147,3 +147,25 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
     except Exception:
         manager.disconnect(websocket)
+
+# --- Mount Built Frontend (dist/) to serve web app on http://127.0.0.1:8000 ---
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, RedirectResponse
+
+dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "dist"))
+if os.path.exists(dist_dir) and os.path.exists(os.path.join(dist_dir, "index.html")):
+    assets_dir = os.path.join(dist_dir, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        file_path = os.path.join(dist_dir, full_path)
+        if full_path and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(dist_dir, "index.html"))
+else:
+    @app.get("/")
+    def root():
+        return RedirectResponse(url="/docs")
