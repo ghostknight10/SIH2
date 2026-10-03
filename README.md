@@ -230,28 +230,61 @@ flowchart TD
 
 ## 7. Quickstart & How to Run
 
-### Prerequisites
+### 🚀 1-Command Startup (Runs Everything: Backend + Frontend + Auto-Opens Browser)
+
+You can launch the complete system (FastAPI backend, WebSocket hub, and React frontend) with a single command:
+
+#### **Windows (Command Prompt / PowerShell)**
+```bat
+.\start.bat
+```
+*(Or simply double-click `start.bat` in Windows File Explorer)*
+
+#### **Linux / macOS / WSL**
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+#### **Or via npm**
+```bash
+npm start
+```
+
+> **What happens automatically:**
+> 1. Starts the high-performance Python FastAPI server (`http://127.0.0.1:8000`).
+> 2. Mounts and serves the production-ready React 19 frontend bundle at `/`.
+> 3. Connects real-time WebSockets at `ws://127.0.0.1:8000/ws`.
+> 4. Interactive Swagger API documentation is available at `http://127.0.0.1:8000/docs`.
+> 5. Automatically launches your default web browser to `http://127.0.0.1:8000`!
+
+---
+
+### Alternative: Standalone & Development Modes
+
+#### Prerequisites
 * **Node.js**: `v18.0.0` or higher (Node `v20+` recommended)
 * **npm**: `v9.0.0` or higher
-* **Python** (Optional, for backend): `3.10+` with FastAPI & Uvicorn
+* **Python** (for backend): `3.10+` with FastAPI & Uvicorn (`pip install -r backend/requirements.txt`)
 
-### 1. Installation
-Clone the repository and install all dependencies:
+#### 1. Installation
+Clone the repository and install dependencies:
 ```bash
 git clone https://github.com/ghostknight10/SIH2.git
 cd SIH2
 npm install
+pip install -r backend/requirements.txt
 ```
 
-### 2. Development Server
-Start the local Vite development server with instant Hot Module Replacement (HMR):
+#### 2. Vite Development Server (Hot Module Reloading)
+For live frontend code editing with instant HMR:
 ```bash
 npm run dev
 ```
 Navigate to **`http://localhost:5173`** in your browser.
 
-### 3. Start Python Backend (Optional)
-To run the companion FastAPI + WebSocket telemetry server on `http://127.0.0.1:8000`:
+#### 3. Start Companion Backend
+In a separate terminal:
 ```bash
 npm run backend
 # or: python backend/run.py
@@ -337,6 +370,8 @@ SIH2/
 ├── tests/                  # tactical.test.mjs (16 automated tests)
 ├── .gitignore              # Ignored builds, node_modules, and internal plan docs
 ├── package.json            # Scripts and dependencies
+├── start.bat               # 1-Click Windows Unified Launcher (Opens browser + server)
+├── start.sh                # 1-Click Linux/macOS Unified Launcher
 ├── tsconfig.json           # TypeScript configuration
 └── vite.config.ts          # Vite bundler configuration
 ```

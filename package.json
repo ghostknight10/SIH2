@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "start": "python backend/run.py",
     "dev": "vite",
     "backend": "python backend/run.py",
     "build": "tsc -b && vite build",
