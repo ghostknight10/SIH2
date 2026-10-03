@@ -14,6 +14,7 @@ export const TopBar: React.FC = () => {
     radios,
     theme,
     toggleTheme,
+    isBackendConnected,
   } = useTacticalStore();
 
   const anySevered = Object.values(radios).some((s) => s === 'CUT');
@@ -22,17 +23,31 @@ export const TopBar: React.FC = () => {
   return (
     <header className="h-12 border-b border-slate-200 dark:border-zinc-800/60 bg-white dark:bg-zinc-950 flex items-center shrink-0 z-40 select-none">
       <div className="w-full px-4 flex items-center justify-between text-xs">
-        {/* Left: App Title & Session Name */}
+        {/* Left: App Title, Session Name & Backend Status Badge */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 bg-emerald-600 shrink-0" />
             <span className="font-semibold text-sm text-slate-900 dark:text-zinc-100 tracking-tight">
-              Telemetry Hub
+              PS-248 Tactical C2
             </span>
           </div>
           <span className="text-slate-300 dark:text-zinc-700">/</span>
           <span className="text-slate-500 dark:text-zinc-400 font-mono text-[11px] hidden sm:inline">
             {sessionName}
+          </span>
+          <span
+            className={`text-[10px] font-mono px-1.5 py-0.5 border ${
+              isBackendConnected
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 font-medium'
+                : 'border-slate-300 bg-slate-50 text-slate-600 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400'
+            }`}
+            title={
+              isBackendConnected
+                ? 'Connected to local FastAPI + WebSocket server'
+                : 'Running on high-fidelity in-browser tactical simulator'
+            }
+          >
+            {isBackendConnected ? 'FastAPI Live' : 'Simulator Mode'}
           </span>
         </div>
 

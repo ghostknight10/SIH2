@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useTacticalStore } from '@/store/tacticalStore';
+import { tacticalWs } from '@/services/websocket';
 import { TopBar } from '@/components/Layout/TopBar';
 import { Sidebar } from '@/components/Layout/Sidebar';
 import { LiveScreen } from '@/components/Screens/LiveScreen';
@@ -10,6 +11,11 @@ import { AARScreen } from '@/components/Screens/AARScreen';
 
 export const App: React.FC = () => {
   const { activeTab, tickClock, globalReliability, avgNetworkLatencyMs, theme } = useTacticalStore();
+
+  // Initialize auto-discovering WebSocket client
+  useEffect(() => {
+    tacticalWs.init();
+  }, []);
 
   // Sync theme with HTML document element for Tailwind dark: classes
   useEffect(() => {

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "backend": "python backend/run.py",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "node --test tests/tactical.test.mjs",

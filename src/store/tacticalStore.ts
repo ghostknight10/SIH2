@@ -30,6 +30,10 @@ interface TacticalState {
   // Theme
   theme: 'light' | 'dark';
 
+  // Backend Connectivity
+  isBackendConnected: boolean;
+  setIsBackendConnected: (connected: boolean) => void;
+
   // Navigation & Role
   activeTab: ActiveTab;
   userRole: UserRole;
@@ -409,6 +413,9 @@ export const useTacticalStore = create<TacticalState>((set, get) => ({
   messages: INITIAL_MESSAGES,
   events: INITIAL_EVENTS,
   aarTimeline: INITIAL_TIMELINE,
+
+  isBackendConnected: false,
+  setIsBackendConnected: (connected) => set({ isBackendConnected: connected }),
 
   setTheme: (theme) => set({ theme }),
   toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),

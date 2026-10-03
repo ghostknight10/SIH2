@@ -229,24 +229,14 @@ flowchart TD
 
 ---
 
-## 7. Design System & Typography
+## 7. User Interface & Experience
 
-The design system strictly adheres to utilitarian, engineering-grade standards (**Non-AI, Zero Floating Cards, Zero Soft Shadows**):
+The application is engineered for high-density situational awareness, drawing from real-world telemetry and operations consoles (**Datadog**, **Linear**, and **Grafana**):
 
-| Token | Light Theme ("White Mode") | Dark Theme (Default) |
-|---|---|---|
-| **Canvas** | `#f1f5f9` (Slate-100) | `#09090b` (Zinc-950) |
-| **Surfaces** | `#ffffff` (Solid White) | `#18181b` (Zinc-900 / 60% Alpha) |
-| **Borders** | `1px solid #cbd5e1` (Slate-300) | `1px solid #27272a` (Zinc-800) |
-| **Nominal Accent** | `#059669` (Emerald-600) | `#10b981` (Emerald-500) |
-| **Degraded Accent** | `#d97706` (Amber-600) | `#f59e0b` (Amber-500) |
-| **Severed Accent** | `#dc2626` (Rose-600) | `#f43f5e` (Rose-500) |
-| **UI Font** | **Inter** (`font-sans`, 400/500/600) | **Inter** (`font-sans`, 400/500/600) |
-| **Telemetry Font** | **Geist Mono** (`font-mono tabular-nums`) | **Geist Mono** (`font-mono tabular-nums`) |
-
-* **Zero Rounded Rectangles**: Strict 90-degree corners (`rounded-none`) across all cards, containers, buttons, and inputs.
-* **Anti-Jitter (`tabular-nums`)**: Fixed-width numeric rendering prevents horizontal layout jitter as latencies and packet counters fluctuate in real-time.
-* **Zero Dropdown Glitches**: All `<select>` controls feature explicit light/dark option colors, and primary workflows use 1-click chip buttons to eliminate OS popover styling bugs.
+* **Dual-Theme Support**: Instant toggle between high-contrast **Dark Mode** (zinc-950 canvas) and crisp **Light Mode** (slate-100 canvas with elevated white surfaces and defined borders).
+* **Anti-Jitter Typography**: Built with **Inter** for clean navigational typography and **Geist Mono** with fixed-width tabular numerals (`tabular-nums`) to prevent layout shifting as live pings and packet counters fluctuate.
+* **Streamlined Interaction**: Segmented pills and 1-click target chips replace nested dropdowns for rapid squad targeting and failover simulation.
+* **Visual Hierarchy**: Contiguous metrics strips, dual-axis timeseries charts, and status indicators communicate channel health without cognitive clutter.
 
 ---
 
